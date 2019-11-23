@@ -23,6 +23,11 @@ public:
 	bool SetTitle(const char*);
 	void SetChar(int x, int y, char ch);
 	void SetChar(int x, int y, char ch, int attribute);
+	void FillRect(int x, int y, int width, int height, char ch);
+	void FillRect(int x, int y, int width, int height, char ch, int attribute);
+	void SetAll(char ch);
+	void SetAll(char ch, int attribute);
+
 	char GetChar(int x, int y);
 	int GetWidth();
 	int GetHeight();
@@ -85,11 +90,7 @@ bool ConsoleGame::CreateConsole(int consoleWidth, int consoleHeight, int charWid
 		return false;
 
 	m_screen = new CHAR_INFO[consoleWidth * consoleHeight];
-	for (int i = 0; i < consoleWidth * consoleHeight; i++)
-	{
-		m_screen[i].Char.AsciiChar = fillCharacter;
-		m_screen[i].Attributes = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
-	}
+	SetAll(fillCharacter, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
 
 	CONSOLE_CURSOR_INFO cursorInfo;
 	if (!GetConsoleCursorInfo(m_outHandle, &cursorInfo))
@@ -134,6 +135,35 @@ void ConsoleGame::SetChar(int x, int y, char ch, int attribute)
 {
 	m_screen[x + y * GetWidth()].Char.AsciiChar = ch;
 	m_screen[x + y * GetWidth()].Attributes = attribute;
+}
+
+void ConsoleGame::FillRect(int xPos, int yPos, int width, int height, char fillChar)
+{
+	for (int y = yPos; y < yPos + height;y++)
+		for (int x = xPos; x < xPos + width; x++)
+			SetChar(x, y, fillChar);
+}
+
+void ConsoleGame::FillRect(int xPos, int yPos, int width, int height, char fillChar, int attribute)
+{
+	for (int y = yPos; y < yPos + height;y++)
+		for (int x = xPos; x < xPos + width; x++)
+			SetChar(x, y, fillChar, attribute);
+}
+
+void ConsoleGame::SetAll(char ch)
+{
+	for (int i = 0; i < GetWidth() * GetHeight(); i++)
+		m_screen[i].Char.AsciiChar = ch;
+}
+
+void ConsoleGame::SetAll(char ch, int attribute)
+{
+	for (int i = 0; i < GetWidth() * GetHeight(); i++)
+	{
+		m_screen[i].Char.AsciiChar = ch;
+		m_screen[i].Attributes = attribute;
+	}
 }
 
 char ConsoleGame::GetChar(int x, int y)
