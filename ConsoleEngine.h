@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Windows.h>
+#include <thread>
 
 class ConsoleGame
 {
@@ -10,7 +11,9 @@ private:
 	COORD m_bufferSize;
 	SMALL_RECT m_screenDimensions;
 	bool m_running;
-	bool m_keyPressed[256], m_keyDown[256], m_keyReleased[256];
+	bool m_keyDown[256];
+
+	void UpdateKeys();
 public:
 	HANDLE GetOutputHandle();
 	HANDLE GetInputHandle();
@@ -20,6 +23,8 @@ public:
 	void Stop();
 	virtual void OnCreate() = 0;
 	virtual void OnUpdate() = 0;
+	virtual void OnKeyPress(int keyCode) = 0;
+	virtual void OnKeyRelease(int keyCode) = 0;
 
 	bool SetTitle(const char*);
 	void SetChar(int x, int y, char ch);
@@ -28,10 +33,6 @@ public:
 	void FillRect(int x, int y, int width, int height, char ch, int attribute);
 	void SetAll(char ch);
 	void SetAll(char ch, int attribute);
-
-	bool KeyPressed(int keyCode);
-	bool KeyDown(int keyCode);
-	bool KeyReleased(int keyCode);
 
 	char GetChar(int x, int y);
 	int GetWidth();
@@ -109,20 +110,22 @@ bool ConsoleGame::CreateConsole(int consoleWidth, int consoleHeight, int charWid
 	WriteConsoleOutput(m_outHandle, m_screen, m_bufferSize, { 0, 0 }, &m_screenDimensions);
 
 	memset(m_keyDown, 0, sizeof(bool) * 256);
-	memset(m_keyPressed, 0, sizeof(bool) * 256);
-	memset(m_keyReleased, 0, sizeof(bool) * 256);
 
 	return true;
 }
 
 void ConsoleGame::Start()
 {
+	std::thread keyHandler(&ConsoleGame::UpdateKeys, this);
+
 	m_running = true;
 	while (m_running)
 	{
 		OnUpdate();
 		WriteConsoleOutput(m_outHandle, m_screen, m_bufferSize, { 0, 0 }, &m_screenDimensions);
 	}
+
+	keyHandler.join();
 }
 
 void ConsoleGame::Stop()
@@ -175,37 +178,6 @@ void ConsoleGame::SetAll(char ch, int attribute)
 	}
 }
 
-bool ConsoleGame::KeyPressed(int keyCode)
-{
-	if (!m_keyDown[keyCode] && GetAsyncKeyState(keyCode) < 0)
-	{
-		m_keyDown[keyCode] = true;
-		m_keyPressed[keyCode] = true;
-	}
-	else
-		m_keyPressed[keyCode] = false;
-
-	return m_keyPressed[keyCode];
-}
-
-bool ConsoleGame::KeyDown(int keyCode)
-{
-	return GetAsyncKeyState(keyCode) < 0;
-}
-
-bool ConsoleGame::KeyReleased(int keyCode)
-{	
-	if (!m_keyReleased[keyCode] && m_keyDown[keyCode] && GetAsyncKeyState(keyCode) >= 0)
-	{
-		m_keyReleased[keyCode] = true;
-		m_keyDown[keyCode] = false;
-	}
-	else
-		m_keyReleased[keyCode] = false;
-
-	return m_keyReleased[keyCode];
-}
-
 char ConsoleGame::GetChar(int x, int y)
 {
 	return m_screen[x + y * GetWidth()].Char.AsciiChar;
@@ -219,4 +191,25 @@ int ConsoleGame::GetWidth()
 int ConsoleGame::GetHeight()
 {
 	return m_bufferSize.Y;
+}
+
+void ConsoleGame::UpdateKeys()
+{
+	while (m_running)
+	{
+		for (int key = 0; key < 256; key++)
+		{
+			if (!m_keyDown[key] && GetAsyncKeyState(key) < 0)
+			{
+				m_keyDown[key] = true;
+				OnKeyPress(key);
+			}
+
+			if (m_keyDown[key] && GetAsyncKeyState(key) >= 0)
+			{
+				m_keyDown[key] = false;
+				OnKeyRelease(key);
+			}
+		}
+	}
 }
