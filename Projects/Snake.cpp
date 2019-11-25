@@ -1,15 +1,18 @@
 #include "ConsoleEngine.h"
-#include <iostream>
 #include <vector>
+#include <queue>
 #include <chrono>
+#include <fstream>
 
 using std::chrono_literals::operator""ms;
 
 class Snake : public ConsoleGame
 {
 	std::vector<vec::Vector2> snake;
+	std::queue<int> directionQueue;
 	int direction = 1, appleX, appleY;
 	int width, height;
+	std::ofstream logFile;
 
 	void OnCreate() override
 	{
@@ -28,26 +31,20 @@ class Snake : public ConsoleGame
 		appleY = height / 2;
 		SetChar(appleX, appleY, 219, FOREGROUND_RED | FOREGROUND_INTENSITY);
 
+		logFile.open("logFile.txt");
+
 		srand(time(0));
 	}
 	void OnUpdate() override
 	{
 		auto start = std::chrono::system_clock::now();
 
-		bool dirSet = false;
-		while (std::chrono::system_clock::now() - start < 120ms)
+		while (std::chrono::system_clock::now() - start < 120ms);
+
+		if (directionQueue.size())
 		{
-			if (!dirSet)
-			{
-				if (GetKeyState(VK_UP) < 0 && direction != 0 && direction != 2)
-					direction = 0, dirSet = true;
-				if (GetKeyState(VK_RIGHT) < 0 && direction != 1 && direction != 3)
-					direction = 1, dirSet = true;
-				if (GetKeyState(VK_DOWN) < 0 && direction != 2 && direction != 0)
-					direction = 2, dirSet = true;
-				if (GetKeyState(VK_LEFT) < 0 && direction != 3 && direction != 1)
-					direction = 3, dirSet = true;
-			}
+			direction = directionQueue.front();
+			directionQueue.pop();
 		}
 
 		vec::Vector2 head = snake.front();
@@ -99,6 +96,22 @@ class Snake : public ConsoleGame
 			SetChar(appleX, appleY, 219, FOREGROUND_RED | FOREGROUND_INTENSITY);
 		}
 	}
+
+	void OnKeyPress(int keyCode) override
+	{
+		int currentDirection = directionQueue.size() ? directionQueue.back() : direction;
+
+		if (keyCode == VK_UP && currentDirection != 0 && currentDirection != 2)
+			directionQueue.push(0);
+		if (keyCode == VK_RIGHT && currentDirection != 1 && currentDirection != 3)
+			directionQueue.push(1);
+		if (keyCode == VK_DOWN && currentDirection != 2 && currentDirection != 0)
+			directionQueue.push(2);
+		if (keyCode == VK_LEFT && currentDirection != 3 && currentDirection != 1)
+			directionQueue.push(3);
+	}
+
+	void OnKeyRelease(int keyCode) override {}
 };
 
 int main()
