@@ -17,7 +17,7 @@ private:
 	MazeSquare* m_grid;
 	std::stack<vec::Vector2> position, path;
 	int m_gridWidth, m_gridHeight;
-public:
+
 	void OnCreate() override
 	{
 		m_gridWidth = (GetWidth() - 1) / 3;
@@ -105,13 +105,14 @@ public:
 					else //right
 						FillRect(pos.X * 3 + 3, pos.Y * 3 + 1, 1, 2, 219, FOREGROUND_GREEN);
 				}
-
-				//Sleep(150);
 			}
 
 			Stop();
 		}
+
+		Refresh();
 	}
+	void OnStop() override {}
 	void OnKeyPress(int keyCode) override {}
 	void OnKeyRelease(int keyCode) override {}
 };
@@ -119,6 +120,6 @@ public:
 int main()
 {
 	Maze maze;
-	maze.CreateConsole(200, 100, 8, 8, ' ');
+	maze.CreateConsole(150, 70, 9, 9, ' ');
 	maze.Start();
 }

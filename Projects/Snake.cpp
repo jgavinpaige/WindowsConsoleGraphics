@@ -2,7 +2,6 @@
 #include <vector>
 #include <queue>
 #include <chrono>
-#include <fstream>
 
 using std::chrono_literals::operator""ms;
 
@@ -12,10 +11,11 @@ class Snake : public ConsoleGame
 	std::queue<int> directionQueue;
 	int direction = 1, appleX, appleY;
 	int width, height;
-	std::ofstream logFile;
 
 	void OnCreate() override
 	{
+		SetTitle("Snake Game");
+
 		//initialize game board
 		width = GetWidth(), height = GetHeight();
 		for (int x = 0; x < width; x++)
@@ -30,8 +30,6 @@ class Snake : public ConsoleGame
 		appleX = width / 2;
 		appleY = height / 2;
 		SetChar(appleX, appleY, 219, FOREGROUND_RED | FOREGROUND_INTENSITY);
-
-		logFile.open("logFile.txt");
 
 		srand(time(0));
 	}
@@ -95,7 +93,11 @@ class Snake : public ConsoleGame
 			} while (GetChar(appleX, appleY) != ' ');
 			SetChar(appleX, appleY, 219, FOREGROUND_RED | FOREGROUND_INTENSITY);
 		}
+
+		Refresh();
 	}
+
+	void OnStop() {}
 
 	void OnKeyPress(int keyCode) override
 	{
