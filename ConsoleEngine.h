@@ -14,19 +14,18 @@ private:
 	bool m_keyDown[256];
 
 	void UpdateKeys();
-public:
+
+protected:
 	HANDLE GetOutputHandle();
 	HANDLE GetInputHandle();
 	CHAR_INFO* GetBuffer();
-	bool CreateConsole(int consoleWidth, int consoleHeight, int charWidth, int charHeight, char fillCharacter);
-	void Start();
-	void Stop();
+
 	virtual void OnCreate() = 0;
 	virtual void OnUpdate() = 0;
+	virtual void OnStop() = 0;
 	virtual void OnKeyPress(int keyCode) = 0;
 	virtual void OnKeyRelease(int keyCode) = 0;
 
-	bool SetTitle(const char*);
 	void SetChar(int x, int y, char ch);
 	void SetChar(int x, int y, char ch, int attribute);
 	void FillRect(int x, int y, int width, int height, char ch);
@@ -37,6 +36,14 @@ public:
 	char GetChar(int x, int y);
 	int GetWidth();
 	int GetHeight();
+
+	void Refresh();
+
+public:
+	bool CreateConsole(int consoleWidth, int consoleHeight, int charWidth, int charHeight, char fillCharacter);
+	void Start();
+	void Stop();
+	bool SetTitle(const char*);
 };
 
 namespace vec
@@ -116,16 +123,17 @@ bool ConsoleGame::CreateConsole(int consoleWidth, int consoleHeight, int charWid
 
 void ConsoleGame::Start()
 {
-	std::thread keyHandler(&ConsoleGame::UpdateKeys, this);
-
 	m_running = true;
+	std::thread keyHandler = std::thread(&ConsoleGame::UpdateKeys, this);
+
 	while (m_running)
 	{
 		OnUpdate();
-		WriteConsoleOutput(m_outHandle, m_screen, m_bufferSize, { 0, 0 }, &m_screenDimensions);
 	}
 
 	keyHandler.join();
+
+	OnStop();
 }
 
 void ConsoleGame::Stop()
@@ -191,6 +199,11 @@ int ConsoleGame::GetWidth()
 int ConsoleGame::GetHeight()
 {
 	return m_bufferSize.Y;
+}
+
+void ConsoleGame::Refresh()
+{
+	WriteConsoleOutput(m_outHandle, m_screen, m_bufferSize, { 0, 0 }, &m_screenDimensions);
 }
 
 void ConsoleGame::UpdateKeys()
