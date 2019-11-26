@@ -8,6 +8,7 @@ To use the engine, a class must extend from the `ConsoleGame` abstract class and
 ```
 	void OnCreate()
 	void OnUpdate()
+	void OnStop()
 	void OnKeyPress(int keyCode)
 	void OnKeyRelease(int keyCode)
 ```
@@ -33,6 +34,13 @@ void OnUpdate()
 * Called continuously while the game is running
 
 ```
+void OnStop()
+```
+
+* Called when the `OnUpdate()` functions exits
+* *Not called if `OnUpdate()` is interrupted*
+
+```
 void OnKeyPress(int key)
 ```
 
@@ -45,6 +53,12 @@ void OnKeyRelease(int key)
 
 * Invoked whenever a key is released
 * `key` specifies the keycode of the key that is pressed down which is defined in the [Windows API](https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes)
+
+```
+void Refresh()
+```
+
+* Called to update the screen
 
 ```
 bool CreateConsole(int cW, int cH, int chW, int chH, char fillChar) 
@@ -133,4 +147,3 @@ CHAR_INFO* GetBuffer()
 ```
 
 * Returns a pointer to an array of [CHAR_INFO](https://docs.microsoft.com/en-us/windows/console/char-info-str) which makes up the display and is reffered to as a [buffer](https://docs.microsoft.com/en-us/windows/console/console-screen-buffers)
-
