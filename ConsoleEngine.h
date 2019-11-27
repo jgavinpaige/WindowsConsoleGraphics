@@ -22,9 +22,10 @@ protected:
 
 	virtual void OnCreate() = 0;
 	virtual void OnUpdate() = 0;
-	virtual void OnStop() = 0;
-	virtual void OnKeyPress(int keyCode) = 0;
-	virtual void OnKeyRelease(int keyCode) = 0;
+	virtual void OnStart() {}
+	virtual void OnStop() {}
+	virtual void OnKeyPress(int keyCode) {}
+	virtual void OnKeyRelease(int keyCode) {}
 
 	void SetChar(int x, int y, char ch);
 	void SetChar(int x, int y, char ch, int attribute);
@@ -123,6 +124,8 @@ bool ConsoleGame::CreateConsole(int consoleWidth, int consoleHeight, int charWid
 
 void ConsoleGame::Start()
 {
+	OnStart();
+
 	m_running = true;
 	std::thread keyHandler = std::thread(&ConsoleGame::UpdateKeys, this);
 
