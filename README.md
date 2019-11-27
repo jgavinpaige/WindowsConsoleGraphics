@@ -8,10 +8,16 @@ To use the engine, a class must extend from the `ConsoleGame` abstract class and
 ```
 	void OnCreate()
 	void OnUpdate()
+```
+
+Optionally, the following member functions can be defined for additional functionality:
+```
+	void OnStart()
 	void OnStop()
 	void OnKeyPress(int keyCode)
 	void OnKeyRelease(int keyCode)
 ```
+
 
 Once a child object of `ConsoleGame` is created, the first call must be to the member function:
 ```
@@ -32,6 +38,13 @@ void OnUpdate()
 ```
 
 * Called continuously while the game is running
+
+```
+void OnStart()
+```
+
+* Called immediately after `Start()` and is the executed before the first `OnUpdate()` call
+
 
 ```
 void OnStop()
