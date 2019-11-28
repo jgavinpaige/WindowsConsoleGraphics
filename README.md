@@ -84,6 +84,17 @@ bool CreateConsole(int cW, int cH, int chW, int chH, char fillChar)
 * `fillChar` specifies what character to fill each slot in the console with
 
 ```
+void Start()
+```
+* Called to start the game loop
+
+```
+void Stop()
+```
+* Called to stop the game loop
+* Once called, the game loop will exit after the current call to `OnUpdate()` is finished
+
+```
 void SetTitle(const char*)
 ```
 
